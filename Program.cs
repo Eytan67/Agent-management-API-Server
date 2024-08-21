@@ -1,3 +1,8 @@
+using Microsoft.EntityFrameworkCore;
+using AgentManagementAPIServer.DAL;
+using AgentManagementAPIServer.Services;
+using AgentManagementAPIServer.Intrfaces;
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
@@ -6,6 +11,14 @@ builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+
+//injection DbContext.
+string? connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
+builder.Services.AddDbContext<MyDbContext>(options => options.UseSqlServer
+    (connectionString));
+
+//injection Agent Service.
+builder.Services.AddScoped<IService, AgentsService>();
 
 var app = builder.Build();
 
