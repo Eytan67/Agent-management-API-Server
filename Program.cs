@@ -2,6 +2,7 @@ using Microsoft.EntityFrameworkCore;
 using AgentManagementAPIServer.DAL;
 using AgentManagementAPIServer.Services;
 using AgentManagementAPIServer.Intrfaces;
+using AgentManagementAPIServer.Models;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -18,7 +19,9 @@ builder.Services.AddDbContext<MyDbContext>(options => options.UseSqlServer
     (connectionString));
 
 //injection Agent Service.
-builder.Services.AddScoped<IService, AgentsService>();
+builder.Services.AddScoped<IService<Agent>, AgentsService>();//change to singlton
+builder.Services.AddScoped<IService<Target>, TargetService>();//change to singlton
+
 
 var app = builder.Build();
 

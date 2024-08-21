@@ -4,7 +4,7 @@ using AgentManagementAPIServer.Intrfaces;
 
 namespace AgentManagementAPIServer.Services
 {
-    public class AgentsService : IService
+    public class AgentsService : IService<Agent>
     {
         private readonly MyDbContext _DbContext;
 
@@ -35,16 +35,19 @@ namespace AgentManagementAPIServer.Services
             return agent;
         }
 
-        public async Task CreateAgentAsync(Agent agent)
+        public async Task CreateAgentAsync(Agent newAgent)
         {
-            _DbContext.Agents.Add(agent);
+            _DbContext.Agents.Add(newAgent);
             await _DbContext.SaveChangesAsync();
+            
         }
 
-        public async Task UpdateLocationAsync(int id, Location newLocation)
+        public async Task UpdateLocationAsync(int id, Coordinates newLocation)
         {
             var agent = await _DbContext.Agents.FindAsync(id);
             agent.Location = newLocation;
+            _DbContext.Agents.Update(agent);
+            await _DbContext.SaveChangesAsync();
         }
 
         

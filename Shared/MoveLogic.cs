@@ -5,9 +5,9 @@ namespace AgentManagementAPIServer.Shared
 {
     public class MoveLogic
     {
-        public static Location NextLocation(Location location, EDirection direction)
+        public static Coordinates NextLocation(Coordinates location, EDirection direction)
         {
-            Location newLocation = new Location();
+            Coordinates newLocation = new Coordinates();
             switch (direction)
             {
                 case EDirection.s:

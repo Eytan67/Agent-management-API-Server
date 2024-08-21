@@ -13,7 +13,7 @@ namespace AgentManagementAPIServer.Controllers
     public class AgentsController : ControllerBase
     {
         private readonly AgentsService _agentsService;
-        public AgentsController(IService agentsService)
+        public AgentsController(IService<Agent> agentsService)
         {
             this._agentsService = agentsService as AgentsService;
         }
@@ -33,7 +33,7 @@ namespace AgentManagementAPIServer.Controllers
             return StatusCode(StatusCodes.Status200OK, new { agents });
         }
         [HttpPut("{id}/pin")]
-        public async Task<IActionResult> Pin( [FromQuery]int id, [FromBody] Location? location)
+        public async Task<IActionResult> Pin( [FromQuery]int id, [FromBody] Coordinates? location)
         {
             await _agentsService.UpdateLocationAsync(id, location);
             //Chack if have posibility to create mission.
@@ -54,5 +54,7 @@ namespace AgentManagementAPIServer.Controllers
 
             return StatusCode(StatusCodes.Status200OK);
         }
+
+
     }
 }

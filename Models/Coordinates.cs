@@ -2,11 +2,12 @@
 
 namespace AgentManagementAPIServer.Models
 {
-    public class Location
+    
+    public class Coordinates
     {
         [Key]
         public int Id { get; set; }
-        public string X { get; set; }
-        public string Y { get; set; }
+        public int X { get; set; }
+        public int Y { get; set; }
     }
 }

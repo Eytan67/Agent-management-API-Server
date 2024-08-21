@@ -2,9 +2,13 @@
 
 namespace AgentManagementAPIServer.Intrfaces
 {
-    public interface IService
+    public interface IService<T>
     {
-        //public Agent GetAsync(int id);
+        public Task<List<T>> GetAllAsync();
+        public Task<T> GetAsync(int id);
+        public Task CreateAgentAsync(T newAgent);
+        public Task UpdateLocationAsync(int id, Coordinates newLocation);
+
 
     }
 }

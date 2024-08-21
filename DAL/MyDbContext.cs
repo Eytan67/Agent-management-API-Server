@@ -21,6 +21,8 @@ namespace AgentManagementAPIServer.DAL
         }
 
         public DbSet<Agent> Agents { get; set; }
+        public DbSet<Target> Targets { get; set; }
+
 
     }
 }
