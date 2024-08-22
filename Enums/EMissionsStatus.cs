@@ -2,6 +2,8 @@
 {
     public enum EMissionsStatus
     {
-        Active
+        proposal,
+        CommandForMission,
+        finished
     }
 }

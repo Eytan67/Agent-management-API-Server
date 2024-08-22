@@ -13,9 +13,13 @@ namespace AgentManagementAPIServer.Controllers
     public class TargetsController : ControllerBase
     {
         private readonly TargetService _targetService;
-        public TargetsController(IService<Target> agentsService)
+        private readonly MissionsService _missionsService;
+
+        public TargetsController(IService<Target> agentsService, IService<Mission> missionsService)
         {
             this._targetService = agentsService as TargetService;
+            this._missionsService = missionsService as MissionsService;
+
         }
 
         [HttpPost]
@@ -35,8 +39,9 @@ namespace AgentManagementAPIServer.Controllers
         [HttpPut("{id}/pin")]
         public async Task<IActionResult> Pin([FromQuery] int id, [FromBody] Coordinates? location)
         {
-            await _targetService.UpdateLocationAsync(id, location);
+            Target updatedTarget = await _targetService.UpdateLocationAsync(id, location);
             //Chack if have posibility to create mission.
+            await _missionsService.TryToAddMissionsAsync(updatedTarget);
 
             return StatusCode(StatusCodes.Status200OK);
         }
@@ -49,8 +54,9 @@ namespace AgentManagementAPIServer.Controllers
                 return StatusCode(StatusCodes.Status400BadRequest, new { message = $"{target.Name} alredy ded!" });
             }
             var newLocation = MoveLogic.NextLocation(target.Coordinates, direction);
-            await _targetService.UpdateLocationAsync(id, newLocation);
+            Target updatedTarget = await _targetService.UpdateLocationAsync(id, newLocation);
             //Chack if have posibility to create mission.
+            await _missionsService.TryToAddMissionsAsync(updatedTarget);
 
             return StatusCode(StatusCodes.Status200OK);
         }

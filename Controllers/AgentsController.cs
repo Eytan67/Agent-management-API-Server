@@ -13,13 +13,16 @@ namespace AgentManagementAPIServer.Controllers
     public class AgentsController : ControllerBase
     {
         private readonly AgentsService _agentsService;
-        public AgentsController(IService<Agent> agentsService)
+        private readonly MissionsService _missionsService;
+
+        public AgentsController(IService<Agent> agentsService, IService<Mission> missionsService)
         {
             this._agentsService = agentsService as AgentsService;
+            this._missionsService = missionsService as MissionsService;
         }
 
         [HttpPost]
-        public async Task<IActionResult> Create(Agent? agent)
+        public async Task<IActionResult> Create(Agent agent)
         {
             await _agentsService.CreateAsync(agent);
 
@@ -33,10 +36,11 @@ namespace AgentManagementAPIServer.Controllers
             return StatusCode(StatusCodes.Status200OK, new { agents });
         }
         [HttpPut("{id}/pin")]
-        public async Task<IActionResult> Pin( [FromQuery]int id, [FromBody] Coordinates? location)
+        public async Task<IActionResult> Pin( [FromQuery]int id, [FromBody] Coordinates location)
         {
-            await _agentsService.UpdateLocationAsync(id, location);
+            Agent updatedAgent = await _agentsService.UpdateLocationAsync(id, location);
             //Chack if have posibility to create mission.
+            await _missionsService.TryToAddMissionsAsync(updatedAgent);
 
             return StatusCode(StatusCodes.Status200OK);
         }
@@ -49,8 +53,9 @@ namespace AgentManagementAPIServer.Controllers
                 return StatusCode(StatusCodes.Status400BadRequest, new {message = "This agent is active!" });
             }
             var newLocation = MoveLogic.NextLocation(agent.Coordinates, direction);
-            await _agentsService.UpdateLocationAsync(id, newLocation);
+            Agent updatedAgent = await _agentsService.UpdateLocationAsync(id, newLocation);
             //Chack if have posibility to create mission.
+            await _missionsService.TryToAddMissionsAsync(updatedAgent);
 
             return StatusCode(StatusCodes.Status200OK);
         }

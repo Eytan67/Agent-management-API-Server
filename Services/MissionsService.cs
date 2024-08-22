@@ -44,12 +44,12 @@ namespace AgentManagementAPIServer.Services
         public async Task updateMissionsAsync()
         {
             //get all activ missions
-            var activMissions = _DbContext.Missions.Where(m => m.Status == EMissionsStatus.Active).ToList();
+            var activMissions = _DbContext.Missions.Where(m => m.Status == EMissionsStatus.CommandForMission).ToList();
             //for each miision get her Ajent and Target
             foreach (var activMission in activMissions)
             {
-                Agent agent = await _DbContext.Agents.FindAsync(activMission.Agent.Id);
-                Target target = await _DbContext.Targets.FindAsync(activMission.Target.Id);
+                Agent agent = await _DbContext.Agents.FindAsync(activMission.AgentId);
+                Target target = await _DbContext.Targets.FindAsync(activMission.TargetId);
                 //find the next move direction
                 var direction = MoveLogic.ChoosDirection(agent.Coordinates, target.Coordinates);
                 //find the next location
@@ -68,6 +68,47 @@ namespace AgentManagementAPIServer.Services
             _DbContext.Update(mission);
             await _DbContext.SaveChangesAsync();
 
+        }
+
+        public async Task TryToAddMissionsAsync(IPerson person)
+        {
+            switch (person)
+            {
+                case Agent:
+                    var targets = _DbContext.Targets;//filter only an on missions targets //async?
+                    foreach (var target in targets)
+                    {
+                        if(MoveLogic.IsDistanceAppropriate(person.Coordinates, target.Coordinates))
+                        {
+                            CreateMissionAsync(person as Agent, target);
+                        }
+                    }
+                    break;
+                case Target:
+                    var agents = _DbContext.Agents;//filter only an on missions agents //async?
+                    foreach (var agent in agents)
+                    {
+                        if (MoveLogic.IsDistanceAppropriate(person.Coordinates, agent.Coordinates))
+                        {
+                            CreateMissionAsync(agent, person as Target);
+                        }
+                    }
+                    break;
+                default:
+                    break;
+            }
+        }
+
+        public async Task CreateMissionAsync(Agent agent, Target target)
+        {
+            Mission newMission = new Mission()
+            {
+                AgentId = agent.Id,
+                TargetId = target.Id,
+                Status = EMissionsStatus.proposal
+            };
+            _DbContext.Missions.Add(newMission);
+            await _DbContext.SaveChangesAsync();
         }
     }
 }
