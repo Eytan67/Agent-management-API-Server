@@ -41,7 +41,7 @@ namespace AgentManagementAPIServer.Services
             await _DbContext.SaveChangesAsync();
         }
 
-        public async Task updateMissionsAsync()
+        public async Task UpdateMissionsAsync()
         {
             //get all activ missions
             var activMissions = _DbContext.Missions.Where(m => m.Status == EMissionsStatus.CommandForMission).ToList();

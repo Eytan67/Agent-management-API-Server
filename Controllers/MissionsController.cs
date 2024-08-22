@@ -26,9 +26,9 @@ namespace AgentManagementAPIServer.Controllers
         }
 
         [HttpPost("update")]
-        public async Task<IActionResult> updateMissionsProgres()
+        public async Task<IActionResult> UpdateMissionsProgres()
         {
-            var activMissions = _missionsService.updateMissionsAsync();
+            var activMissions = _missionsService.UpdateMissionsAsync();
 
             return StatusCode(StatusCodes.Status200OK);
         }
