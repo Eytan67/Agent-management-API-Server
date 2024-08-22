@@ -2,8 +2,14 @@
 {
     public enum EDirection
     {
-        se = 1,
+        n,
+        ne,
+        e,
+        se,
         s,
+        sw,
+        w,
+        nw
 
     }
 }
