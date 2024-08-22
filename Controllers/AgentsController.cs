@@ -21,7 +21,7 @@ namespace AgentManagementAPIServer.Controllers
         [HttpPost]
         public async Task<IActionResult> Create(Agent? agent)
         {
-            await _agentsService.CreateAgentAsync(agent);
+            await _agentsService.CreateAsync(agent);
 
             return StatusCode(StatusCodes.Status201Created);
         }
@@ -48,7 +48,7 @@ namespace AgentManagementAPIServer.Controllers
             {
                 return StatusCode(StatusCodes.Status400BadRequest, new {message = "This agent is active!" });
             }
-            var newLocation = MoveLogic.NextLocation(agent.Location, direction);
+            var newLocation = MoveLogic.NextLocation(agent.Coordinates, direction);
             await _agentsService.UpdateLocationAsync(id, newLocation);
             //Chack if have posibility to create mission.
 

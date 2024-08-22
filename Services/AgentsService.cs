@@ -15,7 +15,7 @@ namespace AgentManagementAPIServer.Services
 
         public async Task<List<Agent>> GetAllAsync()
         {
-            var agents = _DbContext.Agents.ToList();
+            var agents = _DbContext.Agents.ToList();//__________________ASYNC?
             if (agents == null)
             {
                 throw new Exception("sumsing wrong!");
@@ -35,7 +35,7 @@ namespace AgentManagementAPIServer.Services
             return agent;
         }
 
-        public async Task CreateAgentAsync(Agent newAgent)
+        public async Task CreateAsync(Agent newAgent)
         {
             _DbContext.Agents.Add(newAgent);
             await _DbContext.SaveChangesAsync();
@@ -45,7 +45,7 @@ namespace AgentManagementAPIServer.Services
         public async Task UpdateLocationAsync(int id, Coordinates newLocation)
         {
             var agent = await _DbContext.Agents.FindAsync(id);
-            agent.Location = newLocation;
+            agent.Coordinates = newLocation;
             _DbContext.Agents.Update(agent);
             await _DbContext.SaveChangesAsync();
         }

@@ -21,7 +21,7 @@ namespace AgentManagementAPIServer.Controllers
         [HttpPost]
         public async Task<IActionResult> Create(Target? target)
         {
-            await _targetService.CreateAgentAsync(target);
+            await _targetService.CreateAsync(target);
 
             return StatusCode(StatusCodes.Status201Created);
         }
@@ -48,7 +48,7 @@ namespace AgentManagementAPIServer.Controllers
             {
                 return StatusCode(StatusCodes.Status400BadRequest, new { message = $"{target.Name} alredy ded!" });
             }
-            var newLocation = MoveLogic.NextLocation(target.Location, direction);
+            var newLocation = MoveLogic.NextLocation(target.Coordinates, direction);
             await _targetService.UpdateLocationAsync(id, newLocation);
             //Chack if have posibility to create mission.
 
