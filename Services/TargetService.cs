@@ -38,13 +38,14 @@ namespace AgentManagementAPIServer.Services
             _DbContext.Targets.Add(newTarget);
             await _DbContext.SaveChangesAsync();
         }
-        public async Task UpdateLocationAsync(int id, Coordinates newLocation)
+        public async Task<Target> UpdateLocationAsync(int id, Coordinates newLocation)
         {
             var target = await _DbContext.Targets.FindAsync(id);
             target.Coordinates = newLocation;
             _DbContext.Targets.Update(target);
             await _DbContext.SaveChangesAsync();
 
+            return target;
         }
 
     }
