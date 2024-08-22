@@ -48,5 +48,11 @@ namespace AgentManagementAPIServer.Shared
             return direction;
 
         }
+        public static bool IsDistanceAppropriate(Coordinates agentLocation, Coordinates targetLocation)
+        {
+            var distance = Math.Sqrt(Math.Pow(agentLocation.X - targetLocation.X,2) + Math.Pow(agentLocation.Y - targetLocation.Y,2));
+
+            return distance < 200;
+        }
     }
 }
