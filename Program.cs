@@ -21,6 +21,8 @@ builder.Services.AddDbContext<MyDbContext>(options => options.UseSqlServer
 //injection Agent Service.
 builder.Services.AddScoped<IService<Agent>, AgentsService>();//change to singlton
 builder.Services.AddScoped<IService<Target>, TargetService>();//change to singlton
+builder.Services.AddScoped<IService<Mission>, MissionsService>();//change to singlton
+
 
 
 var app = builder.Build();
