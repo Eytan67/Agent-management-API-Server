@@ -20,6 +20,33 @@ namespace AgentManagementAPIServer.Shared
 
             return newLocation;
         }
-        //public static void 
+        public static EDirection ChoosDirection(Coordinates agentLocation, Coordinates targetLocation)
+        {
+            EDirection direction;
+            if(agentLocation.X != targetLocation.X && agentLocation.Y != targetLocation.Y)
+            {
+                if (agentLocation.X < targetLocation.X)
+                {
+                    direction = agentLocation.Y < targetLocation.Y ? EDirection.ne : EDirection.se;
+                }
+                else
+                {
+                    direction = agentLocation.Y < targetLocation.Y ? EDirection.nw : EDirection.sw;
+                }
+            }
+            else
+            {
+                if(agentLocation.X != targetLocation.X)
+                {
+                    direction = agentLocation.X < targetLocation.X ? EDirection.e : EDirection.w;
+                }
+                else
+                {
+                    direction = agentLocation.Y < targetLocation.Y ? EDirection.n : EDirection.s;
+                }
+            }
+            return direction;
+
+        }
     }
 }
