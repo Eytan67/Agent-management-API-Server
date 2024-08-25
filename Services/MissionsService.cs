@@ -77,7 +77,9 @@ namespace AgentManagementAPIServer.Services
             switch (person)
             {
                 case Agent:
-                    var targets = _DbContext.Targets;//filter only an on missions targets //async?
+                    var targets1 = _DbContext.Targets;//filter only an on missions targets //async?
+                    var targets =  await _DbContext.Targets.Include(t => t.Location)
+                        .Where(t => t.Status == ETargetStatus.Alive).ToListAsync();
                     foreach (var target in targets)
                     {
                         if(MoveLogic.IsDistanceAppropriate(person.Location, target.Location))
@@ -87,7 +89,8 @@ namespace AgentManagementAPIServer.Services
                     }
                     break;
                 case Target:
-                    var agents = await _DbContext.Agents.Where(a => a.Status == EAgentStatus.Dormant).ToListAsync();
+                    var agents = await _DbContext.Agents.Include(a => a.Location)
+                        .Where(a => a.Status == EAgentStatus.Dormant).ToListAsync();
                     foreach (var agent in agents)
                     {
                         if (MoveLogic.IsDistanceAppropriate(person.Location, agent.Location))

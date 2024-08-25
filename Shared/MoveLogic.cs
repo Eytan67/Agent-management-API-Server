@@ -7,6 +7,7 @@ namespace AgentManagementAPIServer.Shared
     {
         public static Coordinates NextLocation(Coordinates location, EDirection direction)
         {
+            //throw an eror if it out of table
             Coordinates newLocation = new Coordinates();
             switch (direction)
             {
