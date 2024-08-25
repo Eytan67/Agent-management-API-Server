@@ -9,5 +9,17 @@ namespace AgentManagementAPIServer.Models
         public int Id { get; set; }
         public int X { get; set; }
         public int Y { get; set; }
+
+        public Coordinates(int x, int y) { this.X = x; this.Y = y; }
+        public Coordinates() { }
+
+        public static Coordinates operator -(Coordinates c1, Coordinates c2)
+        {
+            return new Coordinates(c1.X - c2.X, c1.Y - c2.Y);
+        }
+        public static Coordinates operator +(Coordinates c1, Coordinates c2)
+        {
+            return new Coordinates(c1.X + c2.X, c1.Y + c2.Y);
+        }
     }
 }
