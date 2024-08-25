@@ -4,6 +4,6 @@ namespace AgentManagementAPIServer.Intrfaces
 {
     public interface IPerson
     {
-        public Coordinates Coordinates { get; set; }
+        public Coordinates? Location { get; set; }
     }
 }

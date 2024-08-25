@@ -24,9 +24,9 @@ namespace AgentManagementAPIServer.Controllers
         [HttpPost]
         public async Task<IActionResult> Create(Agent agent)
         {
-            await _agentsService.CreateAsync(agent);
+            int id = await _agentsService.CreateAsync(agent);
 
-            return StatusCode(StatusCodes.Status201Created);
+            return StatusCode(StatusCodes.Status201Created, new { Id = id});
         }
         [HttpGet]
         public async Task<IActionResult> GetAll()
@@ -36,7 +36,7 @@ namespace AgentManagementAPIServer.Controllers
             return StatusCode(StatusCodes.Status200OK, new { agents });
         }
         [HttpPut("{id}/pin")]
-        public async Task<IActionResult> Pin( [FromQuery]int id, [FromBody] Coordinates location)
+        public async Task<IActionResult> Pin( [FromRoute]int id, [FromBody] Coordinates location)
         {
             Agent updatedAgent = await _agentsService.UpdateLocationAsync(id, location);
             //Chack if have posibility to create mission.
@@ -45,14 +45,15 @@ namespace AgentManagementAPIServer.Controllers
             return StatusCode(StatusCodes.Status200OK);
         }
         [HttpPut("{id}/move")]
-        public async Task<IActionResult> Move([FromQuery]int id, [FromBody] EDirection direction)
+        public async Task<IActionResult> Move([FromRoute]int id, [FromBody] Dictionary<string, string> dict)
         {
+            EDirection direction = Translate(dict["direction"]);
             Agent agent = await _agentsService.GetAsync(id);
             if (agent.Status == EAgentStatus.Active)
             {
                 return StatusCode(StatusCodes.Status400BadRequest, new {message = "This agent is active!" });
             }
-            var newLocation = MoveLogic.NextLocation(agent.Coordinates, direction);
+            var newLocation = MoveLogic.NextLocation(agent.Location, direction);
             Agent updatedAgent = await _agentsService.UpdateLocationAsync(id, newLocation);
             //Chack if have posibility to create mission.
             await _missionsService.TryToAddMissionsAsync(updatedAgent);
@@ -60,6 +61,11 @@ namespace AgentManagementAPIServer.Controllers
             return StatusCode(StatusCodes.Status200OK);
         }
 
-
+        private EDirection Translate(string dir)
+        {
+            Dictionary<string, EDirection> dict = new Dictionary<string, EDirection>();
+            dict["ne"] = EDirection.ne;
+            return dict[dir];
+        }
     }
 }

@@ -9,7 +9,9 @@ namespace AgentManagementAPIServer.Models
         [Key]
         public int Id { get; set; }
         public string Name { get; set; }
-        public Coordinates Coordinates { get; set; }
+        public Coordinates? Location { get; set; }
+        public string Position {  get; set; }
+        public string Photo_url {  get; set; }
         public ETargetStatus Status {  get; set; }
     }
 }

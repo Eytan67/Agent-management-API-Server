@@ -1,6 +1,7 @@
 ﻿using AgentManagementAPIServer.DAL;
 using AgentManagementAPIServer.Models;
 using AgentManagementAPIServer.Intrfaces;
+using Microsoft.EntityFrameworkCore;
 
 namespace AgentManagementAPIServer.Services
 {
@@ -15,7 +16,7 @@ namespace AgentManagementAPIServer.Services
 
         public async Task<List<Agent>> GetAllAsync()
         {
-            var agents = _DbContext.Agents.ToList();//__________________ASYNC?
+            var agents = await _DbContext.Agents.Include(l => l.Location).ToListAsync();
             if (agents == null)
             {
                 throw new Exception("sumsing wrong!");
@@ -35,19 +36,24 @@ namespace AgentManagementAPIServer.Services
             return agent;
         }
 
-        public async Task CreateAsync(Agent newAgent)
+        public async Task<int> CreateAsync(Agent newAgent)
         {
             _DbContext.Agents.Add(newAgent);
             await _DbContext.SaveChangesAsync();
-            
+            return newAgent.Id;
         }
 
         public async Task<Agent> UpdateLocationAsync(int id, Coordinates newLocation)
         {
-            var agent = await _DbContext.Agents.FindAsync(id);
-            agent.Coordinates = newLocation;
-            _DbContext.Agents.Update(agent);
-            await _DbContext.SaveChangesAsync();
+            var agent = await _DbContext.Agents.Include(a => a.Location).FirstOrDefaultAsync(a => a.Id == id);
+            if(agent != null && agent.Location == null)
+            {
+                agent.Location = newLocation;
+
+                _DbContext.Agents.Update(agent);
+                await _DbContext.SaveChangesAsync();
+            }
+
             return agent;
         }
 

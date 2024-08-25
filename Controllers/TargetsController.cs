@@ -25,9 +25,9 @@ namespace AgentManagementAPIServer.Controllers
         [HttpPost]
         public async Task<IActionResult> Create(Target? target)
         {
-            await _targetService.CreateAsync(target);
+            int id = await _targetService.CreateAsync(target);
 
-            return StatusCode(StatusCodes.Status201Created);
+            return StatusCode(StatusCodes.Status201Created, new { Id = id});
         }
         [HttpGet]
         public async Task<IActionResult> GetAll()
@@ -37,7 +37,7 @@ namespace AgentManagementAPIServer.Controllers
             return StatusCode(StatusCodes.Status200OK, new { targets });
         }
         [HttpPut("{id}/pin")]
-        public async Task<IActionResult> Pin([FromQuery] int id, [FromBody] Coordinates? location)
+        public async Task<IActionResult> Pin([FromRoute] int id, [FromBody] Coordinates? location)
         {
             Target updatedTarget = await _targetService.UpdateLocationAsync(id, location);
             //Chack if have posibility to create mission.
@@ -46,19 +46,26 @@ namespace AgentManagementAPIServer.Controllers
             return StatusCode(StatusCodes.Status200OK);
         }
         [HttpPut("{id}/move")]
-        public async Task<IActionResult> Move([FromQuery] int id, [FromBody] EDirection direction)
+        public async Task<IActionResult> Move([FromRoute] int id, [FromBody] Dictionary<string, string> dict)
         {
+            EDirection direction = Translate(dict["direction"]);
             Target target = await _targetService.GetAsync(id);
             if (target.Status == ETargetStatus.Eeliminated)
             {
                 return StatusCode(StatusCodes.Status400BadRequest, new { message = $"{target.Name} alredy ded!" });
             }
-            var newLocation = MoveLogic.NextLocation(target.Coordinates, direction);
+            var newLocation = MoveLogic.NextLocation(target.Location, direction);
             Target updatedTarget = await _targetService.UpdateLocationAsync(id, newLocation);
             //Chack if have posibility to create mission.
             await _missionsService.TryToAddMissionsAsync(updatedTarget);
 
             return StatusCode(StatusCodes.Status200OK);
+        }
+        private EDirection Translate(string dir)
+        {
+            Dictionary<string, EDirection> dict = new Dictionary<string, EDirection>();
+            dict["ne"] = EDirection.ne;
+            return dict[dir];
         }
     }
 }

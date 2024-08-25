@@ -6,7 +6,7 @@ namespace AgentManagementAPIServer.Intrfaces
     {
         public Task<List<T>> GetAllAsync();
         public Task<T> GetAsync(int id);
-        public Task CreateAsync(T newItem);
+        public Task<int> CreateAsync(T newItem);
         //public Task UpdateAsync(int id, Coordinates newLocation);
 
 
