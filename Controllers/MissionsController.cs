@@ -28,15 +28,15 @@ namespace AgentManagementAPIServer.Controllers
         [HttpPost("update")]
         public async Task<IActionResult> UpdateMissionsProgres()
         {
-            var activMissions = _missionsService.UpdateMissionsAsync();
+            await _missionsService.UpdateMissionsAsync();
 
             return StatusCode(StatusCodes.Status200OK);
         }
 
         [HttpPut("{id}")]
-        public async Task<IActionResult> CommandForMission([FromQuery] int id, [FromBody] EMissionsStatus status)
+        public async Task<IActionResult> CommandForMission([FromRoute] int id, [FromBody]Dictionary<string, string> status)
         {
-            await _missionsService.UpdateStatusAsync(id, status);
+            await _missionsService.UpdateStatusAsync(id);
 
             return StatusCode(StatusCodes.Status200OK);
         }
