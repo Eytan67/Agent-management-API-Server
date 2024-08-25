@@ -17,7 +17,7 @@ namespace AgentManagementAPIServer.Services
         }
         public async Task<List<Mission>> GetAllAsync()
         {
-            var missions = _DbContext.Missions.ToList();//__________________ASYNC?
+            var missions = await _DbContext.Missions.ToListAsync();
             if (missions == null)
             {
                 throw new Exception("sumsing wrong!");
@@ -46,27 +46,56 @@ namespace AgentManagementAPIServer.Services
         public async Task UpdateMissionsAsync()
         {
             //get all activ missions
-            var activMissions = _DbContext.Missions.Where(m => m.Status == EMissionsStatus.CommandForMission).ToList();
+            var activMissions = _DbContext.Missions
+                .Where(m => m.Status == EMissionsStatus.CommandForMission).ToList();
             //for each miision get her Ajent and Target
-            foreach (var activMission in activMissions)
+            foreach (var mission in activMissions)
             {
-                Agent agent = await _DbContext.Agents.FindAsync(activMission.AgentId);
-                Target target = await _DbContext.Targets.FindAsync(activMission.TargetId);
+                var agent = await _DbContext.Agents.Include(a => a.Location)
+                    .FirstOrDefaultAsync( a => a.Id == mission.AgentId);
+                var target = await _DbContext.Targets.Include(t => t.Location)
+                    .FirstOrDefaultAsync(t => t.Id == mission.TargetId);
                 //find the next move direction
                 var newLocation = MoveLogic.NextLocationByCoordinates(agent.Location, target.Location);
-                //find the next location
-                //Coordinates newLocation = MoveLogic.NextLocation(agent.Location, direction);
 
                 //update new location
-                agent.Location = newLocation;
+                agent.Location.X = newLocation.X;
+                agent.Location.Y = newLocation.Y;
+
+                if(agent.Location == target.Location)
+                {
+                    agent.Status = EAgentStatus.Dormant;
+                    agent.Stars += 1;
+                    mission.Status = EMissionsStatus.finished;
+                    target.Status = ETargetStatus.Eeliminated;
+                    _DbContext.Targets.Update(target);
+                    _DbContext.Missions.Update(mission);
+                }
+                _DbContext.Agents.Update(agent);
                 await _DbContext.SaveChangesAsync();
             }
         }
 
-        public async Task UpdateStatusAsync(int id, EMissionsStatus status)
+        public async Task UpdateStatusAsync(int id)
         {
             var mission = await _DbContext.Missions.FindAsync(id);
-            mission.Status = status;
+            if(mission == null) { return; }//to handle_____________________
+            var agent = await _DbContext.Agents.Include(a => a.Location).FirstOrDefaultAsync(a => a.Id == mission.AgentId); 
+            var target = await _DbContext.Targets.Include(l => l.Location).FirstOrDefaultAsync(t => t.Id == mission.TargetId); 
+            if (agent == null || target == null
+                || !MoveLogic.IsDistanceAppropriate(agent.Location, target.Location))
+            {  return; }//to handle_____________________
+
+            mission.Status = EMissionsStatus.CommandForMission;
+            //get all missions with the same Agent or Target.
+            var canceledMissions = await _DbContext.Missions
+                .Where(m => m.AgentId == agent.Id || m.TargetId == target.Id)
+                .ToListAsync();
+            //get out our mission from the list.
+            canceledMissions.Remove(mission);
+            //delete all canceledMissions.
+            _DbContext.Missions.RemoveRange(canceledMissions);
+            //update our mission.
             _DbContext.Update(mission);
             await _DbContext.SaveChangesAsync();
 
@@ -77,13 +106,21 @@ namespace AgentManagementAPIServer.Services
             switch (person)
             {
                 case Agent:
-                    var targets1 = _DbContext.Targets;//filter only an on missions targets //async?
+                    //filter only an on missions targets //async?
                     var targets =  await _DbContext.Targets.Include(t => t.Location)
                         .Where(t => t.Status == ETargetStatus.Alive).ToListAsync();
                     foreach (var target in targets)
                     {
                         if(MoveLogic.IsDistanceAppropriate(person.Location, target.Location))
                         {
+                            //anshure that this mission not created before
+                            var mission = await _DbContext.Missions
+                                    .FirstOrDefaultAsync(m => m.AgentId == person.Id 
+                                    && m.TargetId == target.Id);
+                            if (mission != null)
+                            {
+                                continue;
+                            }
                             CreateMissionAsync(person as Agent, target);
                         }
                     }
@@ -95,6 +132,13 @@ namespace AgentManagementAPIServer.Services
                     {
                         if (MoveLogic.IsDistanceAppropriate(person.Location, agent.Location))
                         {
+                            var mission = await _DbContext.Missions.
+                                    FirstOrDefaultAsync(m => m.TargetId == person.Id
+                                    && m.AgentId == agent.Id);
+                            if (mission != null)
+                            {
+                                continue;
+                            }
                             CreateMissionAsync(agent, person as Target);
                         }
                     }
@@ -110,7 +154,7 @@ namespace AgentManagementAPIServer.Services
             {
                 AgentId = agent.Id,
                 TargetId = target.Id,
-                Status = EMissionsStatus.proposal
+                Status = EMissionsStatus.proposal,
             };
             _DbContext.Missions.Add(newMission);
             await _DbContext.SaveChangesAsync();
