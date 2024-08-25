@@ -11,5 +11,6 @@ namespace AgentManagementAPIServer.Models
         public string Nickname { get; set; }
         public Coordinates? Location { get; set; }
         public EAgentStatus Status { get; set; }
+        public int Stars {  get; set; }
     }
 }
