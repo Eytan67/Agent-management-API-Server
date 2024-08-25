@@ -8,7 +8,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace AgentManagementAPIServer.Controllers
 {
-    [Route("api/[controller]")]
+    [Route("[controller]")]
     [ApiController]
     public class AgentsController : ControllerBase
     {
@@ -47,25 +47,18 @@ namespace AgentManagementAPIServer.Controllers
         [HttpPut("{id}/move")]
         public async Task<IActionResult> Move([FromRoute]int id, [FromBody] Dictionary<string, string> dict)
         {
-            EDirection direction = Translate(dict["direction"]);
-            Agent agent = await _agentsService.GetAsync(id);
-            if (agent.Status == EAgentStatus.Active)
+            try
             {
-                return StatusCode(StatusCodes.Status400BadRequest, new {message = "This agent is active!" });
+                Agent agent = await _agentsService.MoveAsync(id, dict["direction"]);
+                await _missionsService.TryToAddMissionsAsync(agent);
             }
-            var newLocation = MoveLogic.NextLocation(agent.Location, direction);
-            Agent updatedAgent = await _agentsService.UpdateLocationAsync(id, newLocation);
-            //Chack if have posibility to create mission.
-            await _missionsService.TryToAddMissionsAsync(updatedAgent);
+            catch (Exception ex)
+            {
+                return StatusCode(StatusCodes.Status400BadRequest, new { message = ex.Message });
+            }
 
             return StatusCode(StatusCodes.Status200OK);
         }
 
-        private EDirection Translate(string dir)
-        {
-            Dictionary<string, EDirection> dict = new Dictionary<string, EDirection>();
-            dict["ne"] = EDirection.ne;
-            return dict[dir];
-        }
     }
 }

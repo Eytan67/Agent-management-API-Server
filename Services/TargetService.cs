@@ -2,6 +2,8 @@
 using AgentManagementAPIServer.DAL;
 using AgentManagementAPIServer.Models;
 using Microsoft.EntityFrameworkCore;
+using AgentManagementAPIServer.Enums;
+using AgentManagementAPIServer.Shared;
 
 
 namespace AgentManagementAPIServer.Services
@@ -26,7 +28,7 @@ namespace AgentManagementAPIServer.Services
         }
         public async Task<Target> GetAsync(int id)
         {
-            var target = await _DbContext.Targets.FindAsync(id);
+            var target = await _DbContext.Targets.Include(l => l.Location).FirstOrDefaultAsync(t => t.Id == id); ;
             if (target == null)
             {
                 throw new Exception("sumsing wrong!");
@@ -51,6 +53,26 @@ namespace AgentManagementAPIServer.Services
                 await _DbContext.SaveChangesAsync();
             }
 
+            return target;
+        }
+
+        public async Task<Target> MoveAsync(int id, string direction)
+        {
+            Target target = await GetAsync(id);
+            if (target.Status == ETargetStatus.Eeliminated)
+            {
+                throw new InvalidOperationException($"{target.Name} alredy ded!");
+            }
+            if (target.Location == null)
+            {
+                throw new InvalidOperationException($"{target.Name} not pind yet!");
+
+            }
+            var newLocation = MoveLogic.NextLocationByDirection(target.Location, direction);
+            target.Location.X = newLocation.X;
+            target.Location.Y = newLocation.Y;
+            _DbContext.Targets.Update(target);
+            await _DbContext.SaveChangesAsync();
             return target;
         }
 

@@ -2,6 +2,8 @@
 using AgentManagementAPIServer.Models;
 using AgentManagementAPIServer.Intrfaces;
 using Microsoft.EntityFrameworkCore;
+using AgentManagementAPIServer.Enums;
+using AgentManagementAPIServer.Shared;
 
 namespace AgentManagementAPIServer.Services
 {
@@ -27,7 +29,7 @@ namespace AgentManagementAPIServer.Services
 
         public async Task<Agent> GetAsync(int id)
         {
-            var agent = await _DbContext.Agents.FindAsync(id);
+            var agent = await _DbContext.Agents.Include(l => l.Location).FirstOrDefaultAsync(a => a.Id == id);
             if (agent == null)
             {
                 throw new Exception("sumsing wrong!");
@@ -38,6 +40,8 @@ namespace AgentManagementAPIServer.Services
 
         public async Task<int> CreateAsync(Agent newAgent)
         {
+            newAgent.Status = Enums.EAgentStatus.Dormant;
+
             _DbContext.Agents.Add(newAgent);
             await _DbContext.SaveChangesAsync();
             return newAgent.Id;
@@ -54,6 +58,26 @@ namespace AgentManagementAPIServer.Services
                 await _DbContext.SaveChangesAsync();
             }
 
+            return agent;
+        }
+
+        public async Task<Agent> MoveAsync(int id, string direction)
+        {
+            Agent agent = await GetAsync(id);
+            if (agent.Status != EAgentStatus.Dormant)
+            {
+                throw new InvalidOperationException("This agent is active!");
+            }
+            if(agent.Location == null)
+            {
+                throw new InvalidOperationException("This agent not pind yet!");
+
+            }
+            var newLocation = MoveLogic.NextLocationByDirection(agent.Location, direction);
+            agent.Location.X = newLocation.X;
+            agent.Location.Y = newLocation.Y;
+            _DbContext.Agents.Update(agent);
+            await _DbContext.SaveChangesAsync();
             return agent;
         }
 

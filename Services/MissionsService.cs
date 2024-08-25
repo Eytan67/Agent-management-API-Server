@@ -53,9 +53,9 @@ namespace AgentManagementAPIServer.Services
                 Agent agent = await _DbContext.Agents.FindAsync(activMission.AgentId);
                 Target target = await _DbContext.Targets.FindAsync(activMission.TargetId);
                 //find the next move direction
-                var direction = MoveLogic.ChoosDirection(agent.Location, target.Location);
+                var newLocation = MoveLogic.NextLocationByCoordinates(agent.Location, target.Location);
                 //find the next location
-                Coordinates newLocation = MoveLogic.NextLocation(agent.Location, direction);
+                //Coordinates newLocation = MoveLogic.NextLocation(agent.Location, direction);
 
                 //update new location
                 agent.Location = newLocation;
