@@ -29,7 +29,10 @@ namespace AgentManagementAPIServer.Shared
         }
         public static bool IsDistanceAppropriate(Coordinates agentLocation, Coordinates targetLocation)
         {
-            var distance = Math.Sqrt(Math.Pow(agentLocation.X - targetLocation.X,2) + Math.Pow(agentLocation.Y - targetLocation.Y,2));
+            var distance = Math.Sqrt(
+                Math.Pow(agentLocation.X - targetLocation.X,2) 
+                + Math.Pow(agentLocation.Y - targetLocation.Y,2)
+                );
 
             return distance < 200;
         }
@@ -43,11 +46,11 @@ namespace AgentManagementAPIServer.Shared
         private static Coordinates DefineVector(Coordinates agentPoints, Coordinates targetPoints)
         {
             var vector = targetPoints - agentPoints;
-            vector.X = vector.X > 0 ? 1 : -1;
-            vector.Y = vector.Y > 0 ? 1 : -1;
+            vector.X = vector.X > 0 ? 1 : vector.X < 0 ? -1 : 0;
+            vector.Y = vector.Y > 0 ? 1 : vector.Y > 0 ? -1 : 0;
             return vector;
         }
-        private static Dictionary<string, Coordinates> DirectionDictionary
+        private static readonly Dictionary<string, Coordinates> DirectionDictionary
     = new Dictionary<string, Coordinates>()
     {
                 { "n", new Coordinates(0, 1) },
