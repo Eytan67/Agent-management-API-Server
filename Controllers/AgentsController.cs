@@ -33,7 +33,15 @@ namespace AgentManagementAPIServer.Controllers
         {
             var agents =  await _agentsService.GetAllAsync();
 
-            return StatusCode(StatusCodes.Status200OK, new { agents });
+            return StatusCode(StatusCodes.Status200OK, agents );
+        }
+
+        [HttpGet("{id}")]
+        public async Task<IActionResult> GetAgent(int id)
+        {
+            var agent = await _agentsService.GetAsync(id);
+
+            return StatusCode(StatusCodes.Status200OK, agent );
         }
         [HttpPut("{id}/pin")]
         public async Task<IActionResult> Pin( [FromRoute]int id, [FromBody] Coordinates location)

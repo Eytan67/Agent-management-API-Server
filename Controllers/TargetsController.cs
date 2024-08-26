@@ -34,8 +34,18 @@ namespace AgentManagementAPIServer.Controllers
         {
             var targets = await _targetService.GetAllAsync();
 
-            return StatusCode(StatusCodes.Status200OK, new { targets });
+            return StatusCode(StatusCodes.Status200OK, targets );
         }
+
+        [HttpGet("{id}")]
+        public async Task<IActionResult> GetAll(int id)
+        {
+            var target = await _targetService.GetAsync(id);
+
+            return StatusCode(StatusCodes.Status200OK, target );
+        }
+
+
         [HttpPut("{id}/pin")]
         public async Task<IActionResult> Pin([FromRoute] int id, [FromBody] Coordinates? location)
         {
