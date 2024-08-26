@@ -28,6 +28,7 @@ namespace AgentManagementAPIServer.Controllers
 
             return StatusCode(StatusCodes.Status201Created, new { Id = id});
         }
+
         [HttpGet]
         public async Task<IActionResult> GetAll()
         {
@@ -43,10 +44,12 @@ namespace AgentManagementAPIServer.Controllers
 
             return StatusCode(StatusCodes.Status200OK, agent );
         }
+
         [HttpPut("{id}/pin")]
         public async Task<IActionResult> Pin( [FromRoute]int id, [FromBody] Coordinates location)
         {
             Agent updatedAgent = await _agentsService.UpdateLocationAsync(id, location);
+
             //Chack if have posibility to create mission.
             await _missionsService.TryToAddMissionsAsync(updatedAgent);
 

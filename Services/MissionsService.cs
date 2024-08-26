@@ -4,6 +4,7 @@ using AgentManagementAPIServer.Intrfaces;
 using AgentManagementAPIServer.Models;
 using AgentManagementAPIServer.Shared;
 using Microsoft.EntityFrameworkCore;
+using System;
 
 namespace AgentManagementAPIServer.Services
 {
@@ -15,6 +16,8 @@ namespace AgentManagementAPIServer.Services
         {
             this._DbContext = context;
         }
+
+
         public async Task<List<Mission>> GetAllAsync()
         {
             var missions = await _DbContext.Missions.ToListAsync();
@@ -25,14 +28,8 @@ namespace AgentManagementAPIServer.Services
 
             return missions;
         }
-        //public async Task<List<Mission>> GetActivMissionsAsync()
-        //{
-        //    var missions = await _DbContext.Missions.Where(m => m.Status == EMissionsStatus.CommandForMission).ToListAsync();
-        //    foreach (var mission in missions)
-        //    {
-        //        mission.AgentId
-        //    }
-        //}
+
+
         public async Task<Mission> GetAsync(int id)
         {
             var mission = await _DbContext.Missions.FindAsync(id);
@@ -44,12 +41,14 @@ namespace AgentManagementAPIServer.Services
             return mission;
         }
 
+
         public async Task<int> CreateAsync(Mission newMission)
         {
             _DbContext.Missions.Add(newMission);
             await _DbContext.SaveChangesAsync();
             return 1;
         }
+
 
         public async Task UpdateMissionsAsync()
         {
@@ -92,7 +91,7 @@ namespace AgentManagementAPIServer.Services
             var target = await _DbContext.Targets.Include(l => l.Location).FirstOrDefaultAsync(t => t.Id == mission.TargetId); 
             if (agent == null || target == null
                 || !MoveLogic.IsDistanceAppropriate(agent.Location, target.Location))
-            {  return; }//to handle_____________________
+            {  return; }//to handle_____________________delete also
 
             mission.Status = EMissionsStatus.CommandForMission;
             //get all missions with the same Agent or Target.
@@ -104,7 +103,13 @@ namespace AgentManagementAPIServer.Services
             //delete all canceledMissions.
             _DbContext.Missions.RemoveRange(canceledMissions);
             //update our mission.
-            _DbContext.Update(mission);
+            agent.Status = EAgentStatus.Active;
+            target.Status = ETargetStatus.Targeted;
+
+            _DbContext.Agents.Update(agent);
+            _DbContext.Targets.Update(target);
+            _DbContext.Missions.Update(mission);
+
             await _DbContext.SaveChangesAsync();
 
         }
@@ -114,39 +119,33 @@ namespace AgentManagementAPIServer.Services
             switch (person)
             {
                 case Agent:
-                    //filter only an on missions targets //async?
-                    var targets =  await _DbContext.Targets.Include(t => t.Location)
-                        .Where(t => t.Status == ETargetStatus.Alive).ToListAsync();
+                    //filter only an on missions targets.
+                    var targets =  await _DbContext.Targets
+                        .Include(t => t.Location)
+                        .Where(t => t.Status == ETargetStatus.Alive)
+                        .ToListAsync();
                     foreach (var target in targets)
                     {
-                        if(MoveLogic.IsDistanceAppropriate(person.Location, target.Location))
+                        //anshure that this mission not created before And distance appropriate
+                        if ( MoveLogic.IsDistanceAppropriate(person.Location, target.Location) 
+                            && !await IsMissionExistsAsync(person.Id, target.Id)
+                            )
                         {
-                            //anshure that this mission not created before
-                            var mission = await _DbContext.Missions
-                                    .FirstOrDefaultAsync(m => m.AgentId == person.Id 
-                                    && m.TargetId == target.Id);
-                            if (mission != null)
-                            {
-                                continue;
-                            }
                             CreateMissionAsync(person as Agent, target);
                         }
                     }
                     break;
                 case Target:
-                    var agents = await _DbContext.Agents.Include(a => a.Location)
-                        .Where(a => a.Status == EAgentStatus.Dormant).ToListAsync();
+                    var agents = await _DbContext.Agents
+                        .Include(a => a.Location)
+                        .Where(a => a.Status == EAgentStatus.Dormant)
+                        .ToListAsync();
                     foreach (var agent in agents)
                     {
-                        if (MoveLogic.IsDistanceAppropriate(person.Location, agent.Location))
-                        {
-                            var mission = await _DbContext.Missions.
-                                    FirstOrDefaultAsync(m => m.TargetId == person.Id
-                                    && m.AgentId == agent.Id);
-                            if (mission != null)
-                            {
-                                continue;
-                            }
+                        if (MoveLogic.IsDistanceAppropriate(person.Location, agent.Location)
+                            && !await IsMissionExistsAsync(agent.Id, person.Id)
+                            )
+                        { 
                             CreateMissionAsync(agent, person as Target);
                         }
                     }
@@ -166,6 +165,13 @@ namespace AgentManagementAPIServer.Services
             };
             _DbContext.Missions.Add(newMission);
             await _DbContext.SaveChangesAsync();
+        }
+        public async Task<bool> IsMissionExistsAsync(int agentId, int targetId)
+        {
+            var mission = await _DbContext.Missions
+                                    .FirstOrDefaultAsync(m => m.AgentId == agentId
+                                    && m.TargetId == targetId);
+            return mission != null;
         }
     }
 }

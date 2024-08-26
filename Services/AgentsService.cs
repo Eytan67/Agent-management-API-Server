@@ -49,7 +49,11 @@ namespace AgentManagementAPIServer.Services
 
         public async Task<Agent> UpdateLocationAsync(int id, Coordinates newLocation)
         {
-            var agent = await _DbContext.Agents.Include(a => a.Location).FirstOrDefaultAsync(a => a.Id == id);
+            var agent = await _DbContext.Agents
+                .Include(a => a.Location)
+                .FirstOrDefaultAsync(a => a.Id == id);
+
+            //cheak if alredy pind
             if(agent != null && agent.Location == null)
             {
                 agent.Location = newLocation;
@@ -80,8 +84,6 @@ namespace AgentManagementAPIServer.Services
             await _DbContext.SaveChangesAsync();
             return agent;
         }
-
-        
 
     }
 }

@@ -44,7 +44,10 @@ namespace AgentManagementAPIServer.Services
         }
         public async Task<Target> UpdateLocationAsync(int id, Coordinates newLocation)
         {
-            var target = await _DbContext.Targets.Include(t => t.Location).FirstOrDefaultAsync(t => t.Id == id);
+            var target = await _DbContext.Targets
+                .Include(t => t.Location)
+                .FirstOrDefaultAsync(t => t.Id == id);
+
             if (target != null && target.Location == null)
             {
                 target.Location = newLocation;
