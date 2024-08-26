@@ -33,5 +33,13 @@ namespace AgentManagementAPIServer.Models
         {
             return c1.X != c2.X || c1.Y != c2.Y;
         }
+        public override bool Equals(object obj)
+        {
+            if (obj is Coordinates other)
+            {
+                return X == other.X && Y == other.Y;
+            }
+            return false;
+        }
     }
 }
