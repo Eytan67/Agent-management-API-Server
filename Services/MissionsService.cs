@@ -25,6 +25,14 @@ namespace AgentManagementAPIServer.Services
 
             return missions;
         }
+        //public async Task<List<Mission>> GetActivMissionsAsync()
+        //{
+        //    var missions = await _DbContext.Missions.Where(m => m.Status == EMissionsStatus.CommandForMission).ToListAsync();
+        //    foreach (var mission in missions)
+        //    {
+        //        mission.AgentId
+        //    }
+        //}
         public async Task<Mission> GetAsync(int id)
         {
             var mission = await _DbContext.Missions.FindAsync(id);

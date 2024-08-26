@@ -4,6 +4,7 @@ using AgentManagementAPIServer.Models;
 using AgentManagementAPIServer.Services;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using System.Reflection;
 
 namespace AgentManagementAPIServer.Controllers
 {
@@ -22,8 +23,16 @@ namespace AgentManagementAPIServer.Controllers
         {
             var missions = await _missionsService.GetAllAsync();
 
-            return StatusCode(StatusCodes.Status200OK, new { missions });
+            return StatusCode(StatusCodes.Status200OK,  missions    );
         }
+
+        //[HttpGet("activMissions")]
+        //public async Task<IActionResult> GetActivMissions()
+        //{
+        //    var activMissions = await _missionsService.GetActivMissionsAsync();
+
+        //    return StatusCode(StatusCodes.Status200OK, new { activMissions });
+        //}
 
         [HttpPost("update")]
         public async Task<IActionResult> UpdateMissionsProgres()
