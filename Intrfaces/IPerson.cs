@@ -1,5 +1,8 @@
 ﻿using AgentManagementAPIServer.Models;
 
+
+
+
 namespace AgentManagementAPIServer.Intrfaces
 {
     public interface IPerson
@@ -7,4 +10,6 @@ namespace AgentManagementAPIServer.Intrfaces
         public int Id { get; set; }
         public Coordinates? Location { get; set; }
     }
+
 }
+

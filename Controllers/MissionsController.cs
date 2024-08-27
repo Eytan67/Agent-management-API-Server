@@ -1,10 +1,10 @@
-﻿using AgentManagementAPIServer.Enums;
+﻿using Microsoft.AspNetCore.Mvc;
+
 using AgentManagementAPIServer.Intrfaces;
 using AgentManagementAPIServer.Models;
 using AgentManagementAPIServer.Services;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
-using System.Reflection;
+
+
 
 namespace AgentManagementAPIServer.Controllers
 {
@@ -17,6 +17,7 @@ namespace AgentManagementAPIServer.Controllers
         {
             this._missionsService = missionsService as MissionsService;
         }
+
 
         [HttpGet]
         public async Task<IActionResult> GetAll()
@@ -42,7 +43,6 @@ namespace AgentManagementAPIServer.Controllers
             return StatusCode(StatusCodes.Status200OK, activeMissions);
         }
 
-
         [HttpPost("update")]
         public async Task<IActionResult> UpdateMissionsProgres()
         {
@@ -58,5 +58,8 @@ namespace AgentManagementAPIServer.Controllers
 
             return StatusCode(StatusCodes.Status200OK);
         }
+
     }
+
 }
+

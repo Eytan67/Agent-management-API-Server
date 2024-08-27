@@ -4,8 +4,8 @@ using AgentManagementAPIServer.Intrfaces;
 using AgentManagementAPIServer.Models;
 using AgentManagementAPIServer.Shared;
 using Microsoft.EntityFrameworkCore;
-using System;
-using System.Reflection;
+
+
 
 namespace AgentManagementAPIServer.Services
 {
@@ -33,6 +33,7 @@ namespace AgentManagementAPIServer.Services
         public async Task<Mission> GetAsync(int id)
         {
             var mission = await _DbContext.Missions.FirstOrDefaultAsync(m => m.Id == id);
+            
             return mission;
         }
 
@@ -45,6 +46,7 @@ namespace AgentManagementAPIServer.Services
                 var fullMissions = await GetFullActiveMissionAsync(mission);
                 await UpdatLeftTime(fullMissions);
             }
+
             return missions;
         }
 
@@ -52,9 +54,9 @@ namespace AgentManagementAPIServer.Services
         {
             _DbContext.Missions.Add(newMission);
             await _DbContext.SaveChangesAsync();
+            
             return 1;
         }
-
 
         public async Task UpdateMissionsAsync()
         {
@@ -132,6 +134,7 @@ namespace AgentManagementAPIServer.Services
                 }
             }
         }
+
         //Search mission by her Targte and Agent.
         public async Task<Mission> SearchMissionAsync(int agentId, int targetId)
         {
@@ -153,7 +156,6 @@ namespace AgentManagementAPIServer.Services
                 await _DbContext.SaveChangesAsync();
                 throw new Exception("mission is not more valid");
             }
-
         }
 
         //Deletes all unnecessary tasks.
@@ -226,6 +228,7 @@ namespace AgentManagementAPIServer.Services
             _DbContext.Missions.Update(fullMission.Mission);
             await _DbContext.SaveChangesAsync();
         }
+
         private async Task<FullMission> GetFullActiveMissionAsync(Mission mission)
         {
             FullMission fullMission = new FullMission()
@@ -234,28 +237,35 @@ namespace AgentManagementAPIServer.Services
                 Agent = await GetAgentAsync(mission.AgentId),
                 Target = await GetTargetAsync(mission.TargetId),
             };
+
             return fullMission;
         }
+
         private async Task<Agent> GetAgentAsync(int id)
         {
             var agent = await _DbContext.Agents
                 .Include(a => a.Location)
                 .FirstOrDefaultAsync(a => a.Id == id);
+           
             return agent;
         }
+
         private async Task<List<Agent>> GetAllAgentsAsync()
         {
             var agents = await _DbContext.Agents
                 .Include(a => a.Location)
                 .Where(a => a.Status == EAgentStatus.Dormant)
                 .ToListAsync();
+            
             return agents;
         }
+
         private async Task<Target> GetTargetAsync(int id)
         {
             var target = await _DbContext.Targets
                 .Include(t => t.Location)
                 .FirstOrDefaultAsync(t => t.Id == id);
+           
             return target;
         }
 
@@ -265,9 +275,11 @@ namespace AgentManagementAPIServer.Services
                 .Include(t => t.Location)
                 .Where(t => t.Status == ETargetStatus.Alive)
                 .ToListAsync();
+           
             return targets;
         }
 
-
     }
+
 }
+

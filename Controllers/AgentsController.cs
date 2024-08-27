@@ -1,10 +1,10 @@
-﻿using AgentManagementAPIServer.Enums;
+﻿using Microsoft.AspNetCore.Mvc;
+
 using AgentManagementAPIServer.Intrfaces;
 using AgentManagementAPIServer.Models;
 using AgentManagementAPIServer.Services;
-using AgentManagementAPIServer.Shared;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
+
+
 
 namespace AgentManagementAPIServer.Controllers
 {
@@ -17,9 +17,10 @@ namespace AgentManagementAPIServer.Controllers
 
         public AgentsController(IService<Agent> agentsService, IService<Mission> missionsService)
         {
-            this._agentsService = agentsService as AgentsService;
-            this._missionsService = missionsService as MissionsService;
+            _agentsService = agentsService as AgentsService;
+            _missionsService = missionsService as MissionsService;
         }
+
 
         [HttpPost]
         public async Task<IActionResult> Create(Agent agent)
@@ -55,6 +56,7 @@ namespace AgentManagementAPIServer.Controllers
 
             return StatusCode(StatusCodes.Status200OK);
         }
+
         [HttpPut("{id}/move")]
         public async Task<IActionResult> Move([FromRoute]int id, [FromBody] Dictionary<string, string> dict)
         {
@@ -72,4 +74,6 @@ namespace AgentManagementAPIServer.Controllers
         }
 
     }
+
 }
+

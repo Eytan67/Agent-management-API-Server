@@ -5,6 +5,8 @@ using Microsoft.EntityFrameworkCore;
 using AgentManagementAPIServer.Enums;
 using AgentManagementAPIServer.Shared;
 
+
+
 namespace AgentManagementAPIServer.Services
 {
     public class AgentsService : IService<Agent>
@@ -44,6 +46,7 @@ namespace AgentManagementAPIServer.Services
 
             _DbContext.Agents.Add(newAgent);
             await _DbContext.SaveChangesAsync();
+
             return newAgent.Id;
         }
 

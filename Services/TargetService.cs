@@ -16,6 +16,8 @@ namespace AgentManagementAPIServer.Services
         {
             this._DbContext = context;
         }
+
+
         public async Task<List<Target>> GetAllAsync()
         {
             var targets = await _DbContext.Targets.Include(l => l.Location).ToListAsync();
@@ -26,6 +28,7 @@ namespace AgentManagementAPIServer.Services
 
             return targets;
         }
+
         public async Task<Target> GetAsync(int id)
         {
             var target = await _DbContext.Targets.Include(l => l.Location).FirstOrDefaultAsync(t => t.Id == id); ;
@@ -36,12 +39,14 @@ namespace AgentManagementAPIServer.Services
 
             return target;
         }
+
         public async Task<int> CreateAsync(Target newTarget)
         {
             _DbContext.Targets.Add(newTarget);
             await _DbContext.SaveChangesAsync();
             return newTarget.Id;
         }
+
         public async Task<Target> UpdateLocationAsync(int id, Coordinates newLocation)
         {
             var target = await _DbContext.Targets
@@ -76,8 +81,11 @@ namespace AgentManagementAPIServer.Services
             target.Location.Y = newLocation.Y;
             _DbContext.Targets.Update(target);
             await _DbContext.SaveChangesAsync();
+            
             return target;
         }
 
     }
+
 }
+
