@@ -34,6 +34,14 @@ namespace AgentManagementAPIServer.Controllers
             return StatusCode(StatusCodes.Status200OK, mission);
         }
 
+        [HttpGet("actives")]
+        public async Task<IActionResult> GetActiveMission()
+        {
+            var activeMissions= await _missionsService.GetActiveMissionsAsync();
+
+            return StatusCode(StatusCodes.Status200OK, activeMissions);
+        }
+
 
         [HttpPost("update")]
         public async Task<IActionResult> UpdateMissionsProgres()
