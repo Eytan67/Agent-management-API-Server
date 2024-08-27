@@ -29,12 +29,9 @@ namespace AgentManagementAPIServer.Shared
         }
         public static bool IsDistanceAppropriate(Coordinates agentLocation, Coordinates targetLocation)
         {
-            var distance = Math.Sqrt(
-                Math.Pow(agentLocation.X - targetLocation.X,2) 
-                + Math.Pow(agentLocation.Y - targetLocation.Y,2)
-                );
-
+            var distance = Distance(agentLocation, targetLocation);
             return distance < 200;
+
         }
         private static bool IsInRange(Coordinates coordinates)
         {
@@ -51,8 +48,8 @@ namespace AgentManagementAPIServer.Shared
             return vector;
         }
         private static readonly Dictionary<string, Coordinates> DirectionDictionary
-    = new Dictionary<string, Coordinates>()
-    {
+            = new Dictionary<string, Coordinates>()
+            {
                 { "n", new Coordinates(0, 1) },
                 { "ne", new Coordinates(1, 1) },
                 { "e", new Coordinates(1, 0) },
@@ -61,6 +58,19 @@ namespace AgentManagementAPIServer.Shared
                 { "sw", new Coordinates(-1, -1) },
                 { "w", new Coordinates(-1, 0) },
                 { "nw", new Coordinates(-1, 1) }
-    };
+            };
+
+        public static TimeSpan CalculateLeftTime(Coordinates c1, Coordinates c2)
+        {
+            double distance = Distance(c1, c2);
+            double seconds = (distance / 5) * 3600;
+            TimeSpan leftTime = TimeSpan.FromSeconds(seconds);
+            return leftTime;
+        }
+        public static double Distance(Coordinates c1,  Coordinates c2)
+        {
+          return Math.Sqrt( Math.Pow(c1.X - c2.X, 2) + Math.Pow(c1.Y - c2.Y, 2) );
+        }
+
     }
 }
